@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    .address-card {
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+
+    .payment-methods {
+      margin-top: 20px;
+    }
+
+    .payment-methods input {
+      margin-right: 10px;
+    }
+
+    .cart-summary {
+      margin-top: 25px;
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
+    }
+
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    .total-row {
+      font-weight: bold;
+      margin-top: 15px;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    body { font-family: Arial, sans-serif; padding: 30px; background: #f9f9f9; }
+    h1 { text-align: center; color: #333; }
+    .container { max-width: 800px; margin: auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input, textarea { width: 100%; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc; }
+    .address-card { border: 1px solid #ddd; padding: 10px; margin-top: 10px; border-radius: 5px; }
+    .payment-methods { margin-top: 20px; }
+    .payment-methods input { margin-right: 10px; }
+    .cart-summary { margin-top: 25px; border-top: 1px solid #ddd; padding-top: 15px; }
+    .item-row { display: flex; justify-content: space-between; margin-top: 8px; }
+    .total-row { font-weight: bold; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 10px; }
+    button { background-color: #28a745; color: white; padding: 12px; width: 100%; border: none; font-size: 16px; margin-top: 20px; cursor: pointer; border-radius: 5px; }
+    button:hover { background-color: #218838; }
+    .hidden { display: none; }
+    .upi-section { margin-top: 10px; }
+    .upi-section button { width: auto; margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+  <h1>Checkout</h1>
+  <div class="container">
+    <!-- Address Selection -->
+    <div>
+      <h2>Select Address</h2>
+      <div id="addressSelection"></div>
+      <button onclick="showAddressForm()">Add New Address</button>
+    </div>
+
+    <!-- New Address Form -->
+    <div id="newAddressForm" class="hidden">
+      <h3>New Address</h3>
+      <label for="newName">Full Name:</label>
+      <input type="text" id="newName">
+
+      <label for="newStreet">Street:</label>
+      <input type="text" id="newStreet">
+
+      <label for="newCity">City:</label>
+      <input type="text" id="newCity">
+
+      <label for="newState">State:</label>
+      <input type="text" id="newState">
+
+      <label for="newZip">ZIP Code:</label>
+      <input type="text" id="newZip">
+
+      <label for="newPhone">Phone Number:</label>
+      <input type="tel" id="newPhone">
+
+      <button onclick="saveNewAddress()">Save Address</button>
+    </div>
+
+   <!-- Payment Methods -->
+    <div class="payment-methods">
+      <h2>Payment Method</h2>
+
+      <input type="radio" name="payment" value="gpay" id="gpay" required>
+      <label for="gpay">Google Pay</label>
+      <div id="gpaySection" class="hidden upi-section">
+        <input type="text" id="gpayUpi" placeholder="example@okaxis">
+        <button type="button" onclick="processUpi('gpay')">Process GPay Payment</button>
+      </div>
+
+      <input type="radio" name="payment" value="phonepe" id="phonepe">
+      <label for="phonepe">PhonePe</label>
+      <div id="phonepeSection" class="hidden upi-section">
+        <input type="text" id="phonepeUpi" placeholder="example@ybl">
+        <button type="button" onclick="processUpi('phonepe')">Process PhonePe Payment</button>
+      </div>
+
+      <input type="radio" name="payment" value="cod" id="cod">
+      <label for="cod">Cash on Delivery</label>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="cart-summary" id="cart-summary">
+      <h3>Cart Summary</h3>
+      <!-- Cart items will be inserted here -->
+    </div>
+
+    <button onclick="placeOrder()">Place Order</button>
+  </div>
+
+  
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    loadAddresses();
+    loadCartSummary();
+
+    document.querySelectorAll('input[name="payment"]').forEach(radio => {
+      radio.addEventListener('change', handlePaymentChange);
+    });
+  });
+
+  function loadAddresses() {
+    const addresses = JSON.parse(localStorage.getItem('addresses') || '[]');
+    const addressSelection = document.getElementById('addressSelection');
+
+    if (addresses.length === 0) {
+      addressSelection.innerHTML = "<p>No saved addresses.</p>";
+      return;
+    }
+
+    addressSelection.innerHTML = addresses.map((address, index) => `
+      <div class="address-card">
+        <input type="radio" name="address" value="${index}" required>
+        <label>
+          <strong>${address.name}</strong><br>
+          ${address.street}, ${address.city}, ${address.state} - ${address.zip}<br>
+          Phone: ${address.phone}
+        </label>
+      </div>
+    `).join('');
+  }
+
+  function showAddressForm() {
+    document.getElementById('newAddressForm').classList.remove('hidden');
+  }
+
+  function saveNewAddress() {
+    const name = document.getElementById('newName').value.trim();
+    const street = document.getElementById('newStreet').value.trim();
+    const city = document.getElementById('newCity').value.trim();
+    const state = document.getElementById('newState').value.trim();
+    const zip = document.getElementById('newZip').value.trim();
+    const phone = document.getElementById('newPhone').value.trim();
+
+    if (!name || !street || !city || !state || !zip || !phone) {
+      alert("Please fill all address fields.");
+      return;
+    }
+
+    const addresses = JSON.parse(localStorage.getItem('addresses') || '[]');
+    addresses.push({ name, street, city, state, zip, phone });
+    localStorage.setItem('addresses', JSON.stringify(addresses));
+
+    document.getElementById('newAddressForm').classList.add('hidden');
+    document.querySelectorAll("#newAddressForm input").forEach(input => input.value = "");
+    loadAddresses();
+  }
+
+  function handlePaymentChange(e) {
+    console.log(e.target.value);
+    const gpaySection = document.getElementById('gpaySection');
+    const phonepeSection = document.getElementById('phonepeSection');
+
+    gpaySection.classList.add('hidden');
+    phonepeSection.classList.add('hidden');
+
+    if (e.target.value === 'gpay') gpaySection.classList.remove('hidden');
+    if (e.target.value === 'phonepe') phonepeSection.classList.remove('hidden');
+  }
+
+    function loadCartSummary() {
+  const cartSummary = document.getElementById("cart-summary");
+  const cart = JSON.parse(localStorage.getItem("cartItems")) || [];
+
+  let total = 0;
+
+  cart.forEach(item => {
+    const price = parseFloat(item.price);
+    const quantity = parseInt(item.quantity);
+    const validPrice = isNaN(price) ? 0 : price;
+    const validQuantity = isNaN(quantity) ? 1 : quantity;
+    total += validPrice * validQuantity;
+  });
+
+  cartSummary.innerHTML = `
+    <div class="total-row">
+      <span>Total Price:</span>
+      <span>₹${total.toFixed(2)}</span>
+    </div>
+  `;
+}
+
+function processUpi(method) {
+  console.log("Processing UPI method:", method); // <-- add this
+  const upiInputId = method + "Upi";
+  const upiValue = document.getElementById(upiInputId).value.trim();
+
+  if (!upiValue) {
+    alert("Please enter a valid " + method + " UPI ID.");
+    return;
+  }
+
+  alert(method.toUpperCase() + " Payment initiated for UPI ID: " + upiValue);
+}
+
+
+
+
+    function placeOrder() {
+  const selectedAddress = document.querySelector('input[name="address"]:checked');
+  const selectedPayment = document.querySelector('input[name="payment"]:checked');
+
+  if (!selectedAddress) {
+    alert("Please select an address.");
+    return;
+  }
+
+  if (!selectedPayment) {
+    alert("Please select a payment method.");
+    return;
+  }
+
+  // Store order data if needed
+  localStorage.removeItem("cartItems"); // Optional if you want to clear cart
+
+  // Redirect to order-success page with payment method in URL
+  const paymentMethod = selectedPayment.value;
+  window.location.href = `confirmation.html?payment=${encodeURIComponent(paymentMethod)}`;
+}
+
+</script>
+
+</body>
+</html>
